@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prode Mundial 2026 - Empresa</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <button class="logout-btn hidden" id="logoutBtn">🔓 Cerrar sesión</button>
+
+  <main class="container">
+    <header class="page-header">
+      <h1>🏆 PRODE MUNDIAL 2026 🏆</h1>
+      <p id="sessionInfo" class="session-info"></p>
+    </header>
+
+    <nav class="nav" aria-label="Navegación principal">
+      <button type="button" data-section="home" id="btnHome">Inicio</button>
+      <button type="button" data-section="login" id="btnLogin">Iniciar sesión</button>
+      <button type="button" data-section="register" id="btnRegister">Registrarse</button>
+      <button type="button" data-section="reglas" id="btnReglas">📋 Reglas</button>
+      <button type="button" data-section="prode" id="btnProde" class="auth-only">Mi Prode</button>
+      <button type="button" data-section="ranking" id="btnRanking" class="auth-only">Ranking</button>
+      <button type="button" data-section="admin" id="btnAdmin" class="admin-only">Admin</button>
+    </nav>
+
+    <div id="globalMessage" class="message" role="status"></div>
+
+    <section id="homeSection" class="section">
+      <div class="hero">
+        <h2>¡Viví la emoción del Mundial 2026!</h2>
+        <p>Pronosticá resultados, competí con tus compañeros y seguí el ranking interno de la empresa.</p>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value">48</span>
+            <span class="stat-label">Equipos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">104</span>
+            <span class="stat-label">Partidos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">3</span>
+            <span class="stat-label">Sedes</span>
+          </div>
+        </div>
+
+        <button type="button" id="startBtn" class="btn-cta">⚽ ¡Empezar a jugar!</button>
+      </div>
+
+      <div class="home-content-grid">
+        <section class="home-public-card premios-card">
+          <h2>🎁 Premios</h2>
+          <p class="muted">La organización publicará acá los premios del Prode.</p>
+          <div id="homePremios" class="public-items-list"></div>
+        </section>
+
+        <section class="home-public-card noticias-card">
+          <h2>📣 Noticias</h2>
+          <p class="muted">Novedades, avisos y comunicaciones del administrador.</p>
+          <div id="homeNoticias" class="public-items-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="loginSection" class="section hidden">
+      <h2>Iniciar sesión</h2>
+      <form id="loginForm" class="card-form">
+        <div class="form-group">
+          <label for="loginUsuario">Usuario</label>
+          <input type="text" id="loginUsuario" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required />
+        </div>
+        <button type="submit">Ingresar</button>
+      </form>
+      <div id="loginMessage" class="message" role="status"></div>
+    </section>
+
+    <section id="registerSection" class="section hidden">
+      <h2>Registro de usuario</h2>
+      <form id="registerForm" class="card-form">
+        <div class="form-group">
+          <label for="regUsuario">Nombre de usuario</label>
+          <input type="text" id="regUsuario" minlength="3" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Contraseña</label>
+          <input type="password" id="regPassword" minlength="8" autocomplete="new-password" required />
+          <small>Mínimo 8 caracteres.</small>
+        </div>
+        <button type="submit">Registrarse</button>
+      </form>
+      <div id="registerMessage" class="message" role="status"></div>
+    </section>
+
+    <section id="reglasSection" class="section hidden">
+      <h2>📋 Reglamento – Prode Mundial 2026</h2>
+      <p class="lead">Exclusivo para empleados de la empresa.</p>
+
+      <article class="stats-card">
+        <h3>1. Participantes</h3>
+        <p>Podrán participar exclusivamente los empleados de la empresa que se encuentren activos al momento de inicio del concurso. La participación será gratuita, individual y limitada a un pronóstico por persona.</p>
+      </article>
+
+      <article class="stats-card">
+        <h3>2. Modalidad general</h3>
+        <p>El Prode se compondrá de pronósticos previos y partidos seleccionados de fase de grupos.</p>
+        <p>Se computarán los tres partidos de Argentina en fase de grupos y diez partidos destacados definidos por la organización.</p>
+      </article>
+
+      <article class="stats-card">
+        <h3>3. Puntaje</h3>
+        <h4>3.1. Partidos</h4>
+        <ul>
+          <li>3 puntos por acertar el resultado exacto.</li>
+          <li>1 punto por acertar ganador o empate sin acertar resultado exacto.</li>
+          <li>0 puntos si no se acierta el ganador/empate ni el resultado exacto.</li>
+        </ul>
+        <h4>3.2. Pronósticos previos</h4>
+        <ul>
+          <li>5 puntos por acertar el campeón.</li>
+          <li>3 puntos por acertar el subcampeón.</li>
+          <li>2 puntos por cada semifinalista acertado.</li>
+          <li>3 puntos por acertar exactamente la instancia a la que llegará Argentina.</li>
+        </ul>
+      </article>
+
+      <article class="stats-card">
+        <h3>4. Plazos</h3>
+        <p>No se aceptarán pronósticos fuera de término. Una vez vencido el plazo de cada partido o instancia, no podrán modificarse los pronósticos ya enviados.</p>
+      </article>
+
+      <article class="stats-card">
+        <h3>5. Desempates</h3>
+        <ol>
+          <li>Mayor cantidad de resultados exactos acertados.</li>
+          <li>Mayor cantidad de aciertos parciales.</li>
+          <li>Acierto del campeón del Mundial.</li>
+          <li>De persistir el empate, definición por sorteo.</li>
+        </ol>
+      </article>
+
+      <article class="stats-card">
+        <h3>6. Organización</h3>
+        <p>La organización se reserva la facultad de interpretar y resolver cualquier situación no prevista. La participación implica la aceptación total del reglamento.</p>
+      </article>
+    </section>
+
+    <section id="prodeSection" class="section hidden">
+      <h2>Mis predicciones</h2>
+      <div id="partidosList"></div>
+      <button type="button" id="savePredictionsBtn">💾 Guardar predicciones</button>
+      <div id="prodeMessage" class="message" role="status"></div>
+    </section>
+
+    <section id="rankingSection" class="section hidden">
+      <h2>Tabla de posiciones</h2>
+      <div id="rankingList"></div>
+    </section>
+
+    <section id="adminSection" class="section hidden">
+      <h2>Panel de administrador</h2>
+
+      <div class="admin-tabs">
+        <button type="button" data-admin-tab="resultados" class="active">📊 Resultados</button>
+        <button type="button" data-admin-tab="usuarios">👥 Usuarios</button>
+        <button type="button" data-admin-tab="estadisticas">📈 Estadísticas</button>
+        <button type="button" data-admin-tab="pronosticos">🧾 Pronósticos</button>
+        <button type="button" data-admin-tab="publicaciones">🎁 Premios y noticias</button>
+      </div>
+
+      <div id="resultadosTab" class="admin-content active">
+        <h3>Ingresar resultados</h3>
+        <div id="resultadosReales"></div>
+        <button type="button" id="saveResultsBtn">💾 Guardar resultados</button>
+      </div>
+
+      <div id="usuariosTab" class="admin-content">
+        <h3>Gestionar usuarios</h3>
+        <div class="search-bar">
+          <div class="search-controls">
+            <input type="text" id="searchUsuario" placeholder="Buscar por usuario o email..." />
+            <select id="filterEstado">
+              <option value="">Todos los estados</option>
+              <option value="activo">Activos</option>
+              <option value="bloqueado">Bloqueados</option>
+            </select>
+            <select id="orderBy">
+              <option value="usuario">Ordenar por usuario</option>
+              <option value="email">Ordenar por email</option>
+              <option value="registro">Ordenar por fecha</option>
+              <option value="puntaje">Ordenar por puntaje</option>
+            </select>
+            <button type="button" id="exportCsvBtn">📥 Exportar CSV</button>
+          </div>
+        </div>
+        <div id="listaUsuarios"></div>
+      </div>
+
+      <div id="estadisticasTab" class="admin-content">
+        <h3>Estadísticas generales</h3>
+        <div id="estadisticasGenerales"></div>
+      </div>
+
+      <div id="pronosticosTab" class="admin-content">
+        <h3>Pronósticos cargados por usuario</h3>
+        <div class="search-bar">
+          <div class="search-controls">
+            <input type="text" id="searchPronosticos" placeholder="Buscar usuario o email..." />
+            <button type="button" id="exportPredictionsCsvBtn">📥 Exportar pronósticos CSV</button>
+          </div>
+        </div>
+        <div id="tablaPronosticos"></div>
+      </div>
+
+      <div id="publicacionesTab" class="admin-content">
+        <h3>Premios y noticias del inicio</h3>
+        <p class="muted">Desde acá se cargan los contenidos que aparecerán en la página de Inicio para todos los usuarios.</p>
+
+        <form id="contentForm" class="panel-card">
+          <input type="hidden" id="contentId" />
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="contentTipo">Tipo de publicación</label>
+              <select id="contentTipo" required>
+                <option value="premio">Premio</option>
+                <option value="noticia">Noticia</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="contentOrden">Orden</label>
+              <input type="number" id="contentOrden" value="0" />
+              <small>Menor número = aparece primero.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="contentTitulo">Título</label>
+            <input type="text" id="contentTitulo" placeholder="Ej.: Premio 1° puesto" required />
+          </div>
+
+          <div class="form-group">
+            <label for="contentCuerpo">Detalle</label>
+            <textarea id="contentCuerpo" rows="4" placeholder="Ej.: Cena para dos personas / caja navideña / día libre / etc."></textarea>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="contentPublicado" checked />
+            Publicado en Inicio
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" id="saveContentBtn">💾 Guardar publicación</button>
+            <button type="button" class="secondary" id="clearContentFormBtn">Limpiar</button>
+          </div>
+        </form>
+
+        <div id="adminContentList"></div>
+      </div>
+
+      <div id="adminMessage" class="message" role="status"></div>
+    </section>
+  </main>
+
+  <footer class="footer-credit">
+    <p>Sistema desarrollado internamente por Administración / RRHH – Parque de Descanso.</p>
+  </footer>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button type="button" class="close-modal" id="closeModalBtn" aria-label="Cerrar">&times;</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</body>
+</html>
