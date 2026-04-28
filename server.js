@@ -774,12 +774,12 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   const users = await all(`
     SELECT id, usuario, email, estado, es_admin AS esAdmin, fecha_registro AS fechaRegistro, ultimo_acceso AS ultimoAcceso
     FROM users
-    ORDER BY usuario ASC
+    ORDER BY es_admin DESC, usuario ASC
   `);
 
   const result = [];
   for (const user of users) {
-    const score = await calculateScore(user.id);
+    const score = Boolean(user.esAdmin) ? { points: 0, exactos: 0 } : await calculateScore(user.id);
     result.push({
       ...user,
       esAdmin: Boolean(user.esAdmin),
@@ -841,6 +841,63 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
   }
 
   await run('DELETE FROM users WHERE id = ?', [userId]);
+  res.json({ ok: true });
+});
+
+// ==================== CAMBIAR CONTRASEÑA DEL ADMIN ====================
+
+app.post('/api/change-password', requireAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  const currentPassword = String(req.body.currentPassword || '');
+  const newPassword = String(req.body.newPassword || '');
+  const confirmPassword = String(req.body.confirmPassword || '');
+
+  if (!currentPassword) {
+    return res.status(400).json({ error: 'Debes ingresar tu contraseña actual.' });
+  }
+
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'Las contraseñas no coinciden.' });
+  }
+
+  const user = await get('SELECT password_hash FROM users WHERE id = ?', [userId]);
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado.' });
+  }
+
+  const valid = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!valid) {
+    return res.status(401).json({ error: 'La contraseña actual es incorrecta.' });
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await run('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, userId]);
+
+  res.json({ ok: true, message: 'Contraseña actualizada correctamente.' });
+});
+
+// ==================== ASIGNAR ADMINISTRADOR ====================
+
+app.patch('/api/admin/users/:id/set-admin', requireAdmin, async (req, res) => {
+  const adminId = req.session.user.id;
+  const userId = Number(req.params.id);
+  const esAdmin = req.body.esAdmin ? 1 : 0;
+
+  if (adminId === userId && esAdmin === 0) {
+    return res.status(400).json({ error: 'No podés quitarte a ti mismo los permisos de administrador.' });
+  }
+
+  const user = await get('SELECT id FROM users WHERE id = ?', [userId]);
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado.' });
+  }
+
+  await run('UPDATE users SET es_admin = ? WHERE id = ?', [esAdmin, userId]);
+
   res.json({ ok: true });
 });
 

@@ -338,6 +338,21 @@ h4 {
   color: #721c24;
 }
 
+.badge.admin-badge {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge.user-badge {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.admin-row {
+  background: #fffbea;
+  font-weight: 500;
+}
+
 .admin-tabs {
   display: flex;
   gap: 8px;
@@ -425,6 +440,18 @@ tr:hover {
   top: 20px;
   right: 20px;
   background: #dc3545;
+}
+
+.change-password-btn {
+  position: fixed;
+  z-index: 100;
+  top: 20px;
+  right: 160px;
+  background: #0066cc;
+}
+
+.change-password-btn:hover {
+  background: #004499;
 }
 
 .modal {

@@ -109,6 +109,7 @@ function updateNav() {
   $('#btnLogin').classList.toggle('hidden', isLogged);
   $('#btnRegister').classList.toggle('hidden', isLogged);
   $('#logoutBtn').classList.toggle('hidden', !isLogged);
+  $('#changePasswordBtn').classList.toggle('hidden', !isLogged);
 
   $('#sessionInfo').textContent = isLogged
     ? `Sesión iniciada como ${state.user.usuario}${isAdmin ? ' · Administrador' : ''}`
@@ -215,6 +216,49 @@ async function logout() {
   showMessage('Sesión cerrada.', 'success');
   showSection('home');
 }
+
+async function changePassword() {
+  openModal(`
+    <h2>🔑 Cambiar contraseña</h2>
+    <form id="changePasswordForm">
+      <div class="form-group">
+        <label for="currentPassword">Contraseña actual</label>
+        <input type="password" id="currentPassword" autocomplete="current-password" required>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">Nueva contraseña</label>
+        <input type="password" id="newPassword" minlength="8" autocomplete="new-password" required>
+        <small>Mínimo 8 caracteres.</small>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input type="password" id="confirmPassword" minlength="8" autocomplete="new-password" required>
+      </div>
+      <button type="submit">Cambiar contraseña</button>
+    </form>
+  `);
+
+  $('#changePasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      await api('/api/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword: $('#currentPassword').value,
+          newPassword: $('#newPassword').value,
+          confirmPassword: $('#confirmPassword').value
+        })
+      });
+
+      closeModal();
+      showMessage('Contraseña actualizada correctamente.', 'success');
+    } catch (error) {
+      showMessage(error.message, 'error');
+    }
+  });
+}
+
 
 // ==================== PRODE ====================
 
@@ -628,7 +672,7 @@ function renderAdminUsers() {
   const estado = $('#filterEstado').value;
   const orderBy = $('#orderBy').value;
 
-  let users = state.adminUsers.filter(u => !u.esAdmin);
+  let users = state.adminUsers;
 
   if (search) {
     users = users.filter(u =>
@@ -655,6 +699,7 @@ function renderAdminUsers() {
           <tr>
             <th>Usuario</th>
             <th>Email</th>
+            <th>Rol</th>
             <th>Estado</th>
             <th>Puntaje</th>
             <th>Acciones</th>
@@ -662,21 +707,31 @@ function renderAdminUsers() {
         </thead>
         <tbody>
           ${users.map(user => `
-            <tr>
+            <tr ${user.esAdmin ? 'class="admin-row"' : ''}>
               <td><strong>${escapeHTML(user.usuario)}</strong></td>
               <td>${escapeHTML(user.email)}</td>
+              <td>
+                <span class="badge ${user.esAdmin ? 'admin-badge' : 'user-badge'}">
+                  ${user.esAdmin ? '👑 Administrador' : 'Usuario'}
+                </span>
+              </td>
               <td>
                 <span class="badge ${user.estado === 'activo' ? 'activo' : 'bloqueado'}">
                   ${user.estado === 'activo' ? 'Activo' : 'Bloqueado'}
                 </span>
               </td>
-              <td>${user.puntaje} pts</td>
+              <td>${user.esAdmin ? '-' : user.puntaje + ' pts'}</td>
               <td>
                 <button type="button" class="secondary" data-user-action="edit" data-id="${user.id}">Editar</button>
                 <button type="button" class="${user.estado === 'activo' ? 'danger' : 'secondary'}" data-user-action="toggle" data-id="${user.id}" data-estado="${user.estado}">
                   ${user.estado === 'activo' ? 'Bloquear' : 'Desbloquear'}
                 </button>
                 <button type="button" class="secondary" data-user-action="password" data-id="${user.id}">Reset pass</button>
+                ${!user.esAdmin ? `
+                  <button type="button" class="secondary" data-user-action="promote" data-id="${user.id}">Hacer Admin</button>
+                ` : `
+                  <button type="button" class="secondary" data-user-action="demote" data-id="${user.id}">Quitar Admin</button>
+                `}
                 <button type="button" class="danger" data-user-action="delete" data-id="${user.id}">Eliminar</button>
               </td>
             </tr>
@@ -804,6 +859,38 @@ async function handleUserAction(event) {
         showMessage(error.message, 'error', 'admin');
       }
     });
+  }
+
+  if (action === 'promote') {
+    if (!confirm(`¿Convertir a ${user.usuario} en administrador?`)) return;
+
+    try {
+      await api(`/api/admin/users/${id}/set-admin`, {
+        method: 'PATCH',
+        body: JSON.stringify({ esAdmin: true })
+      });
+
+      showMessage(`${user.usuario} ahora es administrador.`, 'success', 'admin');
+      await loadAdminUsers();
+    } catch (error) {
+      showMessage(error.message, 'error', 'admin');
+    }
+  }
+
+  if (action === 'demote') {
+    if (!confirm(`¿Quitar permisos de administrador a ${user.usuario}?`)) return;
+
+    try {
+      await api(`/api/admin/users/${id}/set-admin`, {
+        method: 'PATCH',
+        body: JSON.stringify({ esAdmin: false })
+      });
+
+      showMessage(`Permisos de administrador quitados a ${user.usuario}.`, 'success', 'admin');
+      await loadAdminUsers();
+    } catch (error) {
+      showMessage(error.message, 'error', 'admin');
+    }
   }
 
   if (action === 'delete') {
@@ -1249,6 +1336,7 @@ function bindEvents() {
   $('#loginForm').addEventListener('submit', handleLogin);
   $('#registerForm').addEventListener('submit', handleRegister);
   $('#logoutBtn').addEventListener('click', logout);
+  $('#changePasswordBtn').addEventListener('click', changePassword);
   $('#savePredictionsBtn').addEventListener('click', savePredictions);
   $('#saveResultsBtn').addEventListener('click', saveResults);
 
